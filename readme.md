@@ -2,9 +2,7 @@
 # Small Ships 1.21.8 port
 
 ### Not working in 1.21.8
-- Shields
-    - `ListTag not compatible with new data save structure, probobly needs a rewrite of how data is saved`
-
+(all major functions should be working now, however saved nbt data, especially shields wont transfer from older versions)
 
 #### Does not seam to work in 1.21.4 but should
 - Dye color of cannon shot

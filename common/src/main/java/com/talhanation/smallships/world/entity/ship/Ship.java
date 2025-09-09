@@ -165,7 +165,7 @@ public abstract class Ship extends AbstractBoat {
         if (this instanceof Sailable sailShip) sailShip.readSailShipSaveData(valueInput);
         if (this instanceof Bannerable bannerShip) bannerShip.readBannerShipSaveData(valueInput);
         if (this instanceof Cannonable cannonShip) cannonShip.readCannonShipSaveData(valueInput);
-        //if (this instanceof Shieldable shieldShip) shieldShip.readShieldShipSaveData(tag);
+        if (this instanceof Shieldable shieldShip) shieldShip.readShieldShipSaveData(valueInput);
 
         this.setSunken(valueInput.getBooleanOr("Sunken", false));
         this.isLocked = (valueInput.getBooleanOr("locked", false));
@@ -188,7 +188,7 @@ public abstract class Ship extends AbstractBoat {
         if (this instanceof Sailable sailShip) sailShip.addSailShipSaveData(valueOutput);
         if (this instanceof Bannerable bannerShip) bannerShip.addBannerShipSaveData(valueOutput);
         if (this instanceof Cannonable cannonShip) cannonShip.addCannonShipSaveData(valueOutput);
-        //if (this instanceof Shieldable shieldShip) shieldShip.addShieldShipSaveData(tag);
+        if (this instanceof Shieldable shieldShip) shieldShip.addShieldShipSaveData(valueOutput);
 
         valueOutput.putBoolean("Sunken", isSunken());
         valueOutput.putBoolean("locked", this.isLocked);

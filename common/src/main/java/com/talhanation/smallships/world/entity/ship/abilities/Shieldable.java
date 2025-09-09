@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+// TODO: The data read/write should need a rewrite
 public interface Shieldable extends Ability {
 
     ShieldPosition getShieldPosition(int index);
@@ -34,75 +35,24 @@ public interface Shieldable extends Ability {
     }
 
     default void readShieldShipSaveData(ValueInput valueInput) {
-        var shieldItems = new ListTag();
-
-        valueInput.list("Shields", CompoundTag.CODEC).ifPresent(shieldList -> {
-            for (CompoundTag compoundTag : shieldList) {
-                ItemStack stack = ItemStack.CODEC.parse(self().registryAccess().createSerializationContext(NbtOps.INSTANCE), compoundTag)
-                        .result().orElse(ItemStack.EMPTY);
-                if (!stack.isEmpty()) {
-                    this.getShields().add(stack);
-                    shieldItems.add(compoundTag);
-
-                    /*ItemStack.CODEC.encodeStart(NbtOps.INSTANCE, stack)
-                            .result()
-                            .ifPresent(shieldItems::add);*/
-                }
-            }
+        valueInput.read("Shields", CompoundTag.CODEC).ifPresent(shields -> {
+            self().setData(Ship.SHIELD_DATA, shields);
         });
-
-        /*
-        var shieldItems = valueInput.read("Shields", Codec.list(CompoundTag.CODEC)).get();
-        for (CompoundTag compoundTag : shieldItems) {
-            DataResult<ItemStack> result = ItemStack.CODEC.parse(
-                    self().registryAccess().createSerializationContext(NbtOps.INSTANCE),
-                    compoundTag
-            );
-            result.result().ifPresent(itemStack -> this.getShields().add(itemStack));
-        }
-         */
-
-        var shieldData = new CompoundTag();
-        shieldData.put("Shields", shieldItems);
-        self().setData(Ship.SHIELD_DATA, shieldData);
     }
 
     default void addShieldShipSaveData(ValueOutput valueOutput) {
-        /*
-        ListTag shieldItems = new ListTag();
-        for (int i = 0; i < this.getShields().size(); ++i) {
-            ItemStack itemStack = this.getShields().get(i);
-            if (!itemStack.isEmpty()) {
-                CompoundTag inTag = new CompoundTag();
-                inTag.putByte("Shields", (byte) i);
-                //Tag itemTag = itemStack.save(self().registryAccess(), inTag);
-                //shieldItems.add(itemTag);
-            }
-        }
-        tag.put("Shields", shieldItems);
-        valueOutput.store("Shields", CompoundTag.CODEC, shieldItems);
-         */
+        this.getShields();
+        CompoundTag tag = self().getData(Ship.SHIELD_DATA);
+        valueOutput.store("Shields", CompoundTag.CODEC, tag);
     }
 
     default List<ItemStack> getShields() {
-        return Collections.emptyList();
-        /*
-        CompoundTag tag = self().getData(Ship.SHIELD_DATA);
-        ListTag shieldItems = tag.getList("Shields", 10);
-
         List<ItemStack> shields = new ArrayList<>() {
             private <T> T updateDataAndReturn(T out) {
                 ListTag shieldItems = new ListTag();
                 for (int i = 0; i < this.size(); ++i) {
                     ItemStack itemStack = this.get(i);
-                    CompoundTag inTag = new CompoundTag();
-                    //inTag.putByte("Shields", (byte) i);
-
-                    //var test = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, self().registryAccess());
-                    //test.store(ItemStack.MAP_CODEC, )
-
-                    //Tag itemTag = itemStack.save(self().registryAccess(), inTag);
-                    shieldItems.add(itemStack);
+                    ItemStack.CODEC.encodeStart(NbtOps.INSTANCE, itemStack).result().ifPresent(shieldItems::add);
                 }
                 CompoundTag newTag = new CompoundTag();
                 newTag.put("Shields", shieldItems);
@@ -121,13 +71,17 @@ public interface Shieldable extends Ability {
             }
         };
 
-        for (int i = 0; i < shieldItems.size(); ++i) {
-            CompoundTag shieldItem = shieldItems.getCompound(i);
-            ItemStack itemStack = ItemStack.parse(self().registryAccess(), shieldItem).orElse(ItemStack.EMPTY);
-            if (!itemStack.isEmpty()) shields.add(itemStack);
-        }
+        CompoundTag tag = self().getData(Ship.SHIELD_DATA);
+        tag.getList("Shields").ifPresent(shieldItems -> {
+            for (int i = 0; i < shieldItems.size(); ++i) {
+                shieldItems.getCompound(i).ifPresent(shieldItem -> {
+                    var itemStack = ItemStack.CODEC.parse(self().registryAccess().createSerializationContext(NbtOps.INSTANCE), shieldItem).result().get();
+                    if (!itemStack.isEmpty()) shields.add(itemStack);
+                });
+            }
+        });
+
         return shields;
-         */
 
     }
 
