@@ -28,7 +28,7 @@ public abstract class ShipModel<T extends Ship> extends EntityModel<ShipRenderSt
         super.setupAnim(state);
 
         if (state.hasContainer) {
-            this.chests[0].visible = state.invFillState >= 15;
+            this.chests[0].visible = state.invFillState >= 15; // --PM-- maybe show one chest as soon as you have at least one item
             this.chests[1].visible = state.invFillState >= 30;
             this.chests[2].visible = state.invFillState >= 60;
             this.chests[3].visible = state.invFillState >= 90;

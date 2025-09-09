@@ -15,10 +15,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.Containers;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.*;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -34,6 +31,8 @@ import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.level.storage.loot.LootTable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -92,27 +91,23 @@ public abstract class ContainerShip extends Ship implements HasCustomInventorySc
         builder.define(CONTAINER_FILL_STATE, (byte) 0);
     }
 
-    /*
     @Override
-    protected void readAdditionalSaveData(@NotNull CompoundTag tag) {
-        super.readAdditionalSaveData(tag);
-        this.readContainerSizeSaveData(tag);
-        //this.readChestVehicleSaveData(tag, this.registryAccess());
+    protected void readAdditionalSaveData(@NotNull ValueInput valueInput) {
+        super.readAdditionalSaveData(valueInput);
+        this.readContainerSizeSaveData(valueInput);
+        this.readChestVehicleSaveData(valueInput);
 
-        //this.setContainerFillState(tag.getByte("ContainerFillState"));
-        this.setContainerFillState((byte) 0);
+        this.setContainerFillState(valueInput.getByteOr("ContainerFillState", (byte) 0));
     }
 
     @Override
-    protected void addAdditionalSaveData(@NotNull CompoundTag tag) {
-        super.addAdditionalSaveData(tag);
-        this.addContainerSizeSaveData(tag);
-        //this.addChestVehicleSaveData(tag, this.registryAccess());
+    protected void addAdditionalSaveData(@NotNull ValueOutput valueOutput) {
+        super.addAdditionalSaveData(valueOutput);
+        this.addContainerSizeSaveData(valueOutput);
+        this.addChestVehicleSaveData(valueOutput);
 
-        tag.putByte("ContainerFillState", this.getContainerFillState());
+        valueOutput.putByte("ContainerFillState", this.getContainerFillState());
     }
-    
-     */
 
     @Override
     public void destroy(ServerLevel level, @NotNull DamageSource damageSource) {
@@ -231,19 +226,21 @@ public abstract class ContainerShip extends Ship implements HasCustomInventorySc
         return null;
     }
 
-    /*
+
     @Override
-    public void readChestVehicleSaveData(@NotNull CompoundTag tag, HolderLookup.Provider levelRegistry) {
+    public void readChestVehicleSaveData(@NotNull ValueInput valueInput) {
         this.clearItemStacks();
-        if (tag.contains("LootTable", 8)) {
-            this.setContainerLootTable(ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.parse(tag.getString("LootTable"))));
-            this.setContainerLootTableSeed(tag.getLong("LootTableSeed"));
-        } else {
-            ContainerUtility.loadAllItems(tag, this.getItemStacks(), levelRegistry);
+        ResourceKey resourceKey = valueInput.read("LootTable", LootTable.KEY_CODEC).orElse(null);
+        this.setContainerLootTable(resourceKey);
+        this.setContainerLootTableSeed(valueInput.getLongOr("LootTableSeed", 0L));
+        if (resourceKey == null) {
+            ContainerHelper.loadAllItems(valueInput, this.getItemStacks());
             this.resizeContainer(this.getContainerSize());
         }
     }
 
+
+/*
     @Override
     public void addChestVehicleSaveData(@NotNull CompoundTag tag, HolderLookup.Provider levelRegistry) {
         if (this.getLootTable().isPresent()) {
@@ -258,11 +255,9 @@ public abstract class ContainerShip extends Ship implements HasCustomInventorySc
 
      */
 
-    public void readContainerSizeSaveData(CompoundTag tag) {
+    public void readContainerSizeSaveData(ValueInput valueInput) {
         //if (!tag.contains("ContainerSize", 3)) tag.putInt("ContainerSize", this.originalContainerSize); // If defineSychedData worked, this line wouldn't be needed
-        //int containerSize = tag.getInt("ContainerSize");
-        int containerSize = 0;
-        if (containerSize == 0) containerSize = this.originalContainerSize;
+        int containerSize = valueInput.getIntOr("ContainerSize", this.originalContainerSize);
         this.updatePaging(containerSize);
         this.setData(CONTAINER_SIZE, containerSize);
         if (!this.level().isClientSide()) this.level().players()
@@ -274,8 +269,8 @@ public abstract class ContainerShip extends Ship implements HasCustomInventorySc
                 .forEach(ServerPlayer::closeContainer);
     }
 
-    public void addContainerSizeSaveData(CompoundTag tag) {
-        tag.putInt("ContainerSize", this.getData(CONTAINER_SIZE));
+    public void addContainerSizeSaveData(ValueOutput valueOutput) {
+        valueOutput.putInt("ContainerSize", this.getData(CONTAINER_SIZE));
     }
 
     private void updatePaging(int containerSize) {

@@ -13,25 +13,17 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class AbstractBoatMixin {
     @Shadow protected abstract void controlBoat();
 
-    // Inject right BEFORE the boat's own controlBoat() call in tick()
-    @Inject(method = "tick", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/entity/vehicle/AbstractBoat;controlBoat()V",
-            shift = At.Shift.BEFORE))
+    @Inject(method = "tick", at = @At("HEAD"))
     private void tickClientAndServerControlBoat(CallbackInfo ci) {
-        if (((AbstractBoat)(Object)this) instanceof Ship) {
-            // call the boat control logic for Ship instances too
-            this.controlBoat();
+        if (((AbstractBoat)(Object)this instanceof Ship)) {
+            this.controlBoat(); // call your ship's custom controls
         }
     }
 
-    // Redirect the original call so non-Ship boats still call controlBoat() normally
-    @Redirect(method = "tick", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/entity/vehicle/AbstractBoat;controlBoat()V"))
+    @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/vehicle/AbstractBoat;controlBoat()V"))
     private void tickCancelControlBoatHereForShip(AbstractBoat instance) {
-        // use the redirected 'instance' instead of 'this'
-        if (!(instance instanceof Ship)) {
+        if (!(((AbstractBoat)(Object)this) instanceof Ship)) {
             this.controlBoat();
         }
-        // if it is a Ship we skip the original call because our inject already handled it
     }
 }
