@@ -1,5 +1,6 @@
 package com.talhanation.smallships.world.entity.cannon;
 
+import com.talhanation.smallships.SmallShipsMod;
 import com.talhanation.smallships.network.ModPackets;
 import com.talhanation.smallships.network.packet.ServerboundEnterCannonBarrelPacket;
 import com.talhanation.smallships.network.packet.ServerboundShootGroundCannonPacket;
@@ -36,6 +37,7 @@ import net.minecraft.world.level.storage.TagValueOutput;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
 import org.joml.Vector3f;
@@ -88,7 +90,8 @@ public class GroundCannonEntity extends Minecart implements ICannon {
     }
 
     protected final void setEntityInBarrelUUID(UUID uuid) {
-        this.entityData.set(UUID, uuid.toString());
+        if (uuid != null ) this.entityData.set(UUID, uuid.toString());
+        else this.entityData.set(UUID, "");
     }
 
     @Nullable
@@ -121,7 +124,7 @@ public class GroundCannonEntity extends Minecart implements ICannon {
                 var uuid = java.util.UUID.fromString(uuidString);
                 setEntityInBarrelUUID(uuid);
             } catch (Exception e) {
-                // hmm?
+                // hmm? // --PM-- TODO
             }
         });
     }
@@ -183,8 +186,7 @@ public class GroundCannonEntity extends Minecart implements ICannon {
     }
 
     @Override
-    public InteractionResult interact(Player player, InteractionHand interactionHand) {
-        /* copied from Minecart.interact */
+    public @NotNull InteractionResult interact(Player player, InteractionHand interactionHand) {
         if (this.itemInteraction(player, interactionHand)) {
             return InteractionResult.CONSUME;
         } else if (player.isSecondaryUseActive()) {

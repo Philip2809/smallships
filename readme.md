@@ -2,8 +2,6 @@
 # Small Ships 1.21.8 port
 
 ### Not working in 1.21.8
-- Controlling ground cannon
-  - And probably some things that will only be found once this is fixed
 - Shields
     - `ListTag not compatible with new data save structure, probobly needs a rewrite of how data is saved`
 
