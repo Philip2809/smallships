@@ -6,9 +6,9 @@
   "refmap": "smallships-common-1.21.8-common-refmap.json",
   "client": [
     "client.KeyboardHandlerMixin",
-    "render.LivingEntityRendererMixin"
-    //"zooming.client.CameraMixin",
-    //"zooming.client.MouseHandlerMixin"
+    "render.LivingEntityRendererMixin",
+    "zooming.client.CameraMixin",
+    "zooming.client.MouseHandlerMixin"
   ],
   "mixins": [
     "container.SimpleContainerAccessor",

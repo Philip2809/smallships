@@ -20,7 +20,7 @@ import net.minecraft.world.entity.player.Inventory;
 
 public class ShipContainerScreen extends AbstractContainerScreen<ShipContainerMenu> {
     private static final ResourceLocation RESOURCE_LOCATION = ResourceLocation.fromNamespaceAndPath(SmallShipsMod.MOD_ID,"textures/gui/ship_inventory.png" );
-    public static final int FONT_COLOR = 4210752;
+    public static final int FONT_COLOR = -12566464;
     private final int rowCount;
     private final int pageCount;
     private final int pageIndex;
@@ -71,7 +71,8 @@ public class ShipContainerScreen extends AbstractContainerScreen<ShipContainerMe
         // render page forwards / backwards buttons
         Button backward = this.addRenderableWidget(new Button.Builder(Component.literal("<"),
                 button -> this.getMenu().clickMenuButton(this.minecraft.player, -1))
-                .pos(leftPos + 115, topPos + 125).size(12, 12)
+                .pos(leftPos + 115, topPos + 125)
+                .size(12, 12)
                 .build());
 
         backward.active = this.pageCount > 1 && this.pageIndex + 1 > 1;
@@ -133,6 +134,11 @@ public class ShipContainerScreen extends AbstractContainerScreen<ShipContainerMe
             }
         }
 
+        // render page number
+        int xOffset = origLeftPos + (int) (133 - (float) (Mth.floor(Math.log10(this.pageCount))) * 6);
+        if (this.pageCount > 1) guiGraphics.drawString(font, (this.pageIndex + 1) + "/"  + this.pageCount, xOffset, this.inventoryLabelY, FONT_COLOR, false);
+
+        // Render ship data
         int leftPos = 260;
         int leftPos2 = 323;
         int topPos = 38;
@@ -155,11 +161,6 @@ public class ShipContainerScreen extends AbstractContainerScreen<ShipContainerMe
         guiGraphics.drawString(font, dmg + "%", leftPos2, topPos + gap * 4, FONT_COLOR, false);
         guiGraphics.drawString(font, currentAttachment + "/" + maxAttachment, leftPos2, topPos + gap * 5, FONT_COLOR, false);
 
-        // render page number
-        int xOffset = origLeftPos + (int) (133 - (float) (Mth.floor(Math.log10(this.pageCount))) * 6);
-        int yOffset = origTopPos + this.rowCount * 18;
-        if (this.pageCount > 1) guiGraphics.drawString(font, (this.pageIndex + 1) + "/"  + this.pageCount, xOffset, yOffset, FONT_COLOR, false);
-
-        guiGraphics.pose().pushMatrix();
+        guiGraphics.pose().popMatrix();
     }
 }
