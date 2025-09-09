@@ -15,6 +15,7 @@ public class ContainerUtility {
         throw new AssertionError();
     }
 
+    /*
     public static void loadAllItems(CompoundTag tag, NonNullList<ItemStack> itemStacks, HolderLookup.Provider levelRegistry) {
         ListTag listTag = tag.getList("Items", 10);
 
@@ -41,4 +42,6 @@ public class ContainerUtility {
 
         tag.put("Items", listTag);
     }
+
+     */
 }

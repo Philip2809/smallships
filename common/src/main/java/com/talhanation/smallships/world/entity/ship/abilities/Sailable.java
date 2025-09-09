@@ -9,6 +9,8 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
 import static com.talhanation.smallships.world.entity.ship.Ship.SAIL_STATE;
 
@@ -18,18 +20,18 @@ public interface Sailable extends Ability {
         if (self().sailStateCooldown > 0) self().sailStateCooldown--;
     }
 
-    default void readSailShipSaveData(CompoundTag tag) {
-        CompoundTag compoundTag = tag.getCompound("Sail");
-        self().setData(SAIL_STATE, compoundTag.getByte("State"));
-        self().setData(Ship.SAIL_COLOR, compoundTag.getString("Color"));
-
+    default void readSailShipSaveData(ValueInput valueInput) {
+        valueInput.read("Sail", CompoundTag.CODEC).ifPresent(compoundTag -> {
+            compoundTag.getByte("State").ifPresent(sailState -> self().setData(SAIL_STATE, sailState));
+            compoundTag.getString("Color").ifPresent(sailColor -> self().setData(Ship.SAIL_COLOR, sailColor));
+        });
     }
 
-    default void addSailShipSaveData(CompoundTag tag) {
+    default void addSailShipSaveData(ValueOutput valueOutput) {
         CompoundTag compoundTag = new CompoundTag();
         compoundTag.putInt("State", self().getData(SAIL_STATE));
         compoundTag.putString("Color", self().getData(Ship.SAIL_COLOR));
-        tag.put("Sail", compoundTag);
+        valueOutput.store("Sail", CompoundTag.CODEC, compoundTag);
     }
 
     default void controlBoatSailShip() {

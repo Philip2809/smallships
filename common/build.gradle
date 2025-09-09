@@ -14,6 +14,9 @@ dependencies {
     compileOnly "com.electronwill.night-config:core:${rootProject.night_config_version}"
     compileOnly "com.electronwill.night-config:toml:${rootProject.night_config_version}"
     modImplementation "fuzs.forgeconfigapiport:forgeconfigapiport-common-forgeapi:${rootProject.forge_config_api_port_version}"
+
+    // Mixin processor for generating refmap
+    //compileOnly "org.spongepowered:mixin:0.8.5:processor"
 }
 
 publishing {

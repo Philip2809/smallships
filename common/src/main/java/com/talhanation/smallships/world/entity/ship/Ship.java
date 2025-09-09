@@ -41,6 +41,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.StringUtils;
@@ -146,45 +148,53 @@ public abstract class Ship extends AbstractBoat {
         builder.define(Ship.SHIELD_DATA, new CompoundTag());
     }
 
-    @Override
-    protected void readAdditionalSaveData(@NotNull CompoundTag tag) {
-        super.readAdditionalSaveData(tag);
 
-        if (tag.contains("Type", 8)) {
-            this.setVariant(Ship.Type.byName(tag.getString("Type")));
-        }
+    @Override
+    protected void readAdditionalSaveData(@NotNull ValueInput valueInput) {
+    //protected void readAdditionalSaveData(@NotNull CompoundTag tag) {
+        super.readAdditionalSaveData(valueInput);
+        // LOADS DATA FROM NBT
+
+        valueInput.getString("Type").ifPresent(type -> this.setVariant(Ship.Type.byName(type)));
 
         Attributes attributes = new Attributes();
-        attributes.loadSaveData(tag, this);
+        // goes in here
+        attributes.loadSaveData(valueInput.read("Attributes", CompoundTag.CODEC).orElse(new CompoundTag()), this);
         this.setData(ATTRIBUTES, attributes.getSaveData());
 
-        if (this instanceof Sailable sailShip) sailShip.readSailShipSaveData(tag);
-        if (this instanceof Bannerable bannerShip) bannerShip.readBannerShipSaveData(tag);
-        if (this instanceof Cannonable cannonShip) cannonShip.readCannonShipSaveData(tag);
-        if (this instanceof Shieldable shieldShip) shieldShip.readShieldShipSaveData(tag);
+        if (this instanceof Sailable sailShip) sailShip.readSailShipSaveData(valueInput);
+        if (this instanceof Bannerable bannerShip) bannerShip.readBannerShipSaveData(valueInput);
+        if (this instanceof Cannonable cannonShip) cannonShip.readCannonShipSaveData(valueInput);
+        //if (this instanceof Shieldable shieldShip) shieldShip.readShieldShipSaveData(tag);
 
-        this.setSunken(tag.getBoolean("Sunken"));
-        this.isLocked = (tag.getBoolean("locked"));
+        this.setSunken(valueInput.getBooleanOr("Sunken", false));
+        this.isLocked = (valueInput.getBooleanOr("locked", false));
     }
 
-    @Override
-    protected void addAdditionalSaveData(@NotNull CompoundTag tag) {
-        super.addAdditionalSaveData(tag);
 
-        tag.putString("Type", this.getVariant().getSerializedName());
+    @Override
+    protected void addAdditionalSaveData(@NotNull ValueOutput valueOutput) {
+    //protected void addAdditionalSaveData(@NotNull CompoundTag tag) {
+        super.addAdditionalSaveData(valueOutput);
+        // WRITES DATA TO NBT
+
+        valueOutput.putString("Type", this.getVariant().getSerializedName());
 
         Attributes attributes = new Attributes();
         attributes.loadSaveData(this.getData(ATTRIBUTES));
-        attributes.addSaveData(tag);
+        var saveData = attributes.getSaveData();
+        valueOutput.store("Attributes", CompoundTag.CODEC, saveData);
 
-        if (this instanceof Sailable sailShip) sailShip.addSailShipSaveData(tag);
-        if (this instanceof Bannerable bannerShip) bannerShip.addBannerShipSaveData(tag);
-        if (this instanceof Cannonable cannonShip) cannonShip.addCannonShipSaveData(tag);
-        if (this instanceof Shieldable shieldShip) shieldShip.addShieldShipSaveData(tag);
+        if (this instanceof Sailable sailShip) sailShip.addSailShipSaveData(valueOutput);
+        if (this instanceof Bannerable bannerShip) bannerShip.addBannerShipSaveData(valueOutput);
+        if (this instanceof Cannonable cannonShip) cannonShip.addCannonShipSaveData(valueOutput);
+        //if (this instanceof Shieldable shieldShip) shieldShip.addShieldShipSaveData(tag);
 
-        tag.putBoolean("Sunken", isSunken());
-        tag.putBoolean("locked", this.isLocked);
+        valueOutput.putBoolean("Sunken", isSunken());
+        valueOutput.putBoolean("locked", this.isLocked);
     }
+
+
 
     @Override
     protected double rideHeight(EntityDimensions entityDimensions) {
@@ -440,7 +450,7 @@ public abstract class Ship extends AbstractBoat {
         if (shipBiomeType == BiomeModifierType.NONE) return 0.0F;
 
         BlockPos pos = new BlockPos((int)this.getX(), (int)this.getY(), (int)this.getZ());
-        int tmp = this.getCommandSenderWorld().getBiome(pos).value().getWaterColor();
+        int tmp = this.level().getBiome(pos).value().getWaterColor();
         float modifier = SmallShipsConfig.Common.shipGeneralBiomeModifier.get().floatValue();
 
         boolean coldBiomes = tmp < 4100000;
@@ -478,7 +488,7 @@ public abstract class Ship extends AbstractBoat {
     }
 
     private boolean interactWithNameTag(@NotNull Player player){
-        if (player.getMainHandItem().is(Items.NAME_TAG) && player.getMainHandItem().has(DataComponents.CUSTOM_NAME) && !player.getCommandSenderWorld().isClientSide){
+        if (player.getMainHandItem().is(Items.NAME_TAG) && player.getMainHandItem().has(DataComponents.CUSTOM_NAME) && !player.level().isClientSide){
             this.setCustomName(player.getMainHandItem().getHoverName());
             this.setCustomNameVisible(false);
             if(!player.isCreative()) player.getMainHandItem().shrink(1);
@@ -510,8 +520,8 @@ public abstract class Ship extends AbstractBoat {
     }
 
     public void repairShip(int repairAmount){
-        this.getCommandSenderWorld().playSound(null, this.getX(), this.getY() + 1, this.getZ(), SoundEvents.WOOD_HIT, SoundSource.BLOCKS, 1F, 0.9F + 0.2F * this.getCommandSenderWorld().getRandom().nextFloat());
-        this.getCommandSenderWorld().playSound(null, this.getX(), this.getY() + 2, this.getZ(), SoundEvents.WOOD_PLACE, SoundSource.BLOCKS, 1F, 0.9F + 0.2F * this.getCommandSenderWorld().getRandom().nextFloat());
+        this.level().playSound(null, this.getX(), this.getY() + 1, this.getZ(), SoundEvents.WOOD_HIT, SoundSource.BLOCKS, 1F, 0.9F + 0.2F * this.level().getRandom().nextFloat());
+        this.level().playSound(null, this.getX(), this.getY() + 2, this.getZ(), SoundEvents.WOOD_PLACE, SoundSource.BLOCKS, 1F, 0.9F + 0.2F * this.level().getRandom().nextFloat());
 
         float newDamage = this.getDamage() - repairAmount;
         if(newDamage < 0) newDamage = 0;
@@ -613,7 +623,7 @@ public abstract class Ship extends AbstractBoat {
     }
 
     private void updateWaterMobs() {
-        if(!this.getCommandSenderWorld().isClientSide()){
+        if(!this.level().isClientSide()){
             double radius = SmallShipsConfig.Common.waterAnimalFleeRadius.get();
             List<WaterAnimal> waterAnimals = this.level().getEntitiesOfClass(WaterAnimal.class, new AABB(getX() - radius, getY() - radius, getZ() - radius, getX() + radius, getY() + radius, getZ() + radius));
             for (WaterAnimal waterAnimal : waterAnimals) {
@@ -641,7 +651,7 @@ public abstract class Ship extends AbstractBoat {
 
     @Override
     public void hurt(DamageSource damageSource, float f) {
-        if (!this.getCommandSenderWorld().isClientSide() && !this.isRemoved()) {
+        if (!this.level().isClientSide() && !this.isRemoved()) {
             this.setDamage(this.getDamage() + f * (this instanceof Shieldable shieldShip ? shieldShip.getDamageModifier() : 1));
             this.markHurt();
             this.gameEvent(GameEvent.ENTITY_DAMAGE, damageSource.getEntity());
@@ -703,7 +713,7 @@ public abstract class Ship extends AbstractBoat {
 
             if (canDoCollisionDamage() && speed > 0.1F) {
                 float damage = speed * SmallShipsConfig.Common.shipGeneralCollisionDamage.get().floatValue();
-                if(damage > 0) entity.hurt(this.getCommandSenderWorld().damageSources().mobAttack(this.getControllingPassenger()), damage);
+                if(damage > 0) entity.hurt(this.level().damageSources().mobAttack(this.getControllingPassenger()), damage);
             }
         }
     }
@@ -715,7 +725,7 @@ public abstract class Ship extends AbstractBoat {
         }
 
         if (passengers.get(0) instanceof Player player) {
-            if(this.getCommandSenderWorld().isClientSide){
+            if(this.level().isClientSide){
                 Minecraft minecraft = Minecraft.getInstance();
                 Player instancePlayer = minecraft.player;
 
@@ -751,7 +761,7 @@ public abstract class Ship extends AbstractBoat {
             this.setRight(right);
             needsUpdate = true;
         }
-        if (this.getCommandSenderWorld().isClientSide && needsUpdate && player != null) {
+        if (this.level().isClientSide && needsUpdate && player != null) {
             ModPackets.clientSendPacket(new ServerboundUpdateShipControlPacket(forward, backward, left, right));
         }
     }

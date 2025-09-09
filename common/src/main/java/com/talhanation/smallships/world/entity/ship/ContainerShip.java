@@ -92,23 +92,27 @@ public abstract class ContainerShip extends Ship implements HasCustomInventorySc
         builder.define(CONTAINER_FILL_STATE, (byte) 0);
     }
 
+    /*
     @Override
     protected void readAdditionalSaveData(@NotNull CompoundTag tag) {
         super.readAdditionalSaveData(tag);
         this.readContainerSizeSaveData(tag);
-        this.readChestVehicleSaveData(tag, this.registryAccess());
+        //this.readChestVehicleSaveData(tag, this.registryAccess());
 
-        this.setContainerFillState(tag.getByte("ContainerFillState"));
+        //this.setContainerFillState(tag.getByte("ContainerFillState"));
+        this.setContainerFillState((byte) 0);
     }
 
     @Override
     protected void addAdditionalSaveData(@NotNull CompoundTag tag) {
         super.addAdditionalSaveData(tag);
         this.addContainerSizeSaveData(tag);
-        this.addChestVehicleSaveData(tag, this.registryAccess());
+        //this.addChestVehicleSaveData(tag, this.registryAccess());
 
         tag.putByte("ContainerFillState", this.getContainerFillState());
     }
+    
+     */
 
     @Override
     public void destroy(ServerLevel level, @NotNull DamageSource damageSource) {
@@ -118,7 +122,7 @@ public abstract class ContainerShip extends Ship implements HasCustomInventorySc
 
     @Override
     public void remove(@NotNull RemovalReason removalReason) {
-        if (!this.getCommandSenderWorld().isClientSide() && removalReason.shouldDestroy()) {
+        if (!this.level().isClientSide() && removalReason.shouldDestroy()) {
             Containers.dropContents(this.level(), this, this);
         }
 
@@ -227,6 +231,7 @@ public abstract class ContainerShip extends Ship implements HasCustomInventorySc
         return null;
     }
 
+    /*
     @Override
     public void readChestVehicleSaveData(@NotNull CompoundTag tag, HolderLookup.Provider levelRegistry) {
         this.clearItemStacks();
@@ -251,9 +256,12 @@ public abstract class ContainerShip extends Ship implements HasCustomInventorySc
         }
     }
 
+     */
+
     public void readContainerSizeSaveData(CompoundTag tag) {
-        if (!tag.contains("ContainerSize", 3)) tag.putInt("ContainerSize", this.originalContainerSize); // If defineSychedData worked, this line wouldn't be needed
-        int containerSize = tag.getInt("ContainerSize");
+        //if (!tag.contains("ContainerSize", 3)) tag.putInt("ContainerSize", this.originalContainerSize); // If defineSychedData worked, this line wouldn't be needed
+        //int containerSize = tag.getInt("ContainerSize");
+        int containerSize = 0;
         if (containerSize == 0) containerSize = this.originalContainerSize;
         this.updatePaging(containerSize);
         this.setData(CONTAINER_SIZE, containerSize);

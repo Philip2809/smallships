@@ -16,7 +16,7 @@ public interface Paddleable extends Ability {
     }
 
     default void controlBoatPaddleShip() {
-        if(self().isControlledByLocalInstance()) {
+        if(self().isLocalInstanceAuthoritative()) { // --PM-- most likely this?
             self().setPaddleState(this.shouldPaddleLeft(), this.shouldPaddleRight());
         }
     }

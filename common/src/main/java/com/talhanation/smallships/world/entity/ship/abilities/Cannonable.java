@@ -1,5 +1,6 @@
 package com.talhanation.smallships.world.entity.ship.abilities;
 
+import com.mojang.serialization.Codec;
 import com.talhanation.smallships.SmallShipsMod;
 import com.talhanation.smallships.config.SmallShipsConfig;
 import com.talhanation.smallships.world.entity.projectile.ShipCannon;
@@ -16,6 +17,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.ContainerEntity;
 import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
@@ -48,16 +51,16 @@ public interface Cannonable extends Ability {
     }
 
     @SuppressWarnings("unused")
-    default void readCannonShipSaveData(CompoundTag tag) {
-        if (tag.contains("CannonCount")) {
-            this.setCannonCount(tag.getByte("CannonCount"));
+    default void readCannonShipSaveData(ValueInput valueInput) {
+        valueInput.read("CannonCount", Codec.BYTE).ifPresent(cannonCount -> {
+            this.setCannonCount(cannonCount);
             this.updateCannonCount();
-        }
+        });
     }
 
     @SuppressWarnings("unused")
-    default void addCannonShipSaveData(CompoundTag tag) {
-        tag.putInt("CannonCount", this.getCannonCount());
+    default void addCannonShipSaveData(ValueOutput valueOutput) {
+        valueOutput.putByte("CannonCount", this.getCannonCount());
     }
 
     default float getCannonModifier() {
@@ -114,7 +117,7 @@ public interface Cannonable extends Ability {
                     .anyMatch(itemStack -> itemStack.getItem().equals(ModItems.CANNON_BALL));
         }
         else if(self().getControllingPassenger() instanceof Player player) {
-            return player.getInventory().items
+            return player.getInventory().getNonEquipmentItems()
                     .stream()
                     .anyMatch(itemStack -> itemStack.getItem().equals(ModItems.CANNON_BALL));
         }
@@ -133,7 +136,7 @@ public interface Cannonable extends Ability {
         }
 
         else if(self().getControllingPassenger() instanceof Player player) {
-            for (ItemStack itemstack : player.getInventory().items) {
+            for (ItemStack itemstack : player.getInventory().getNonEquipmentItems()) {
                 if (itemstack.is((ModItems.CANNON_BALL))) {
                     itemstack.shrink(1);
                     break;

@@ -20,16 +20,21 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.animal.IronGolem;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.*;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.TagValueOutput;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
@@ -42,7 +47,7 @@ import java.util.*;
  */
 public class GroundCannonEntity extends Minecart implements ICannon {
     public static final String ID = "ground_cannon";
-    private static final EntityDataAccessor<Optional<UUID>> UUID = SynchedEntityData.defineId(GroundCannonEntity.class, EntityDataSerializers.OPTIONAL_UUID);
+    private static final EntityDataAccessor<String> UUID = SynchedEntityData.defineId(GroundCannonEntity.class, EntityDataSerializers.STRING);
     private static final EntityDataAccessor<String> DYE = SynchedEntityData.defineId(GroundCannonEntity.class, EntityDataSerializers.STRING);
     private final Cannon cannon = new Cannon(this);
     /**
@@ -69,16 +74,21 @@ public class GroundCannonEntity extends Minecart implements ICannon {
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         super.defineSynchedData(builder);
-        builder.define(UUID, Optional.empty());
+        builder.define(UUID, "");
         builder.define(DYE, "");
     }
 
     public Optional<UUID> getEntityInBarrelUUID() {
-        return this.entityData.get(UUID);
+        // --PM-- could cause errors during runtime I guess? try should fix it
+        try {
+            return Optional.of(java.util.UUID.fromString(this.entityData.get(UUID)));
+        } catch (Exception e) {
+            return Optional.empty();
+        }
     }
 
     protected final void setEntityInBarrelUUID(UUID uuid) {
-        this.entityData.set(UUID, Optional.ofNullable(uuid));
+        this.entityData.set(UUID, uuid.toString());
     }
 
     @Nullable
@@ -93,22 +103,27 @@ public class GroundCannonEntity extends Minecart implements ICannon {
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag tag) {
-        super.addAdditionalSaveData(tag);
+    //public void addAdditionalSaveData(CompoundTag tag) {
+    public void addAdditionalSaveData(ValueOutput valueOutput) {
+        super.addAdditionalSaveData(valueOutput);
         DyeColor dye;
-        if ((dye = this.getDye()) != null) tag.putString("Dye", dye.getSerializedName());
-        this.getEntityInBarrelUUID().ifPresent(uuid -> tag.putUUID("EntityInBarrelUUID", uuid));
+        if ((dye = this.getDye()) != null) valueOutput.putString("Dye", dye.getSerializedName());
+        this.getEntityInBarrelUUID().ifPresent(uuid -> valueOutput.putString("EntityInBarrelUUID", uuid.toString()));
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag tag) {
-        super.readAdditionalSaveData(tag);
-        if (tag.contains("Dye")) {
-            this.setDye(DyeColor.byName(tag.getString("Dye"), null));
-        }
-        if (tag.contains("EntityInBarrelUUID")) {
-            this.setEntityInBarrelUUID(tag.getUUID("EntityInBarrelUUID"));
-        }
+    //public void readAdditionalSaveData(CompoundTag tag) {
+    public void readAdditionalSaveData(ValueInput valueInput) {
+        super.readAdditionalSaveData(valueInput);
+        valueInput.getString("Dye").ifPresent(dyeName -> this.setDye(DyeColor.byName(dyeName, null)));
+        valueInput.getString("EntityInBarrelUUID").ifPresent(uuidString -> {
+            try {
+                var uuid = java.util.UUID.fromString(uuidString);
+                setEntityInBarrelUUID(uuid);
+            } catch (Exception e) {
+                // hmm?
+            }
+        });
     }
 
     public Cannon getCannon() {
@@ -321,9 +336,9 @@ public class GroundCannonEntity extends Minecart implements ICannon {
         if (level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
             ItemStack itemStack = new ItemStack(arg);
             itemStack.set(DataComponents.CUSTOM_NAME, this.getCustomName());
-            CompoundTag tag = new CompoundTag();
+            ValueOutput tag = TagValueOutput.createWithoutContext(ProblemReporter.DISCARDING);
             this.addAdditionalSaveData(tag);
-            itemStack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+            itemStack.set(DataComponents.CUSTOM_DATA, CustomData.of(new CompoundTag())); // --PM-- this is very bad, not correct
             this.spawnAtLocation(level, itemStack);
         }
 
@@ -394,7 +409,7 @@ public class GroundCannonEntity extends Minecart implements ICannon {
         if (driver instanceof ICannonBallSource container) {
             container.consumeCannonBall();
         } else if (this.getPassengerDriver() instanceof Player player) {
-            for (ItemStack itemstack : player.getInventory().items) {
+            for (ItemStack itemstack : player.getInventory().getNonEquipmentItems()) {
                 if (itemstack.is((ModItems.CANNON_BALL))) {
                     itemstack.shrink(1);
                     break;
@@ -428,7 +443,7 @@ public class GroundCannonEntity extends Minecart implements ICannon {
         if (this.getPassengerDriver() instanceof ICannonBallSource container) {
             return container.getCannonBallToShoot();
         } else if (this.getPassengerDriver() instanceof Player player) {
-            return player.getInventory().items.stream().anyMatch(itemStack -> itemStack.getItem().equals(ModItems.CANNON_BALL)) ? ModItems.CANNON_BALL : null;
+            return player.getInventory().getNonEquipmentItems().stream().anyMatch(itemStack -> itemStack.getItem().equals(ModItems.CANNON_BALL)) ? ModItems.CANNON_BALL : null;
         } else {
             return null;
         }

@@ -1,6 +1,7 @@
 package com.talhanation.smallships.world.entity.ship;
 
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.storage.ValueOutput;
 
 public class Attributes {
     public float maxHealth;
@@ -30,24 +31,39 @@ public class Attributes {
     }
 
     public void loadSaveData(CompoundTag tag) {
-        if (tag.contains("Attributes", 10)) {
-            CompoundTag compoundtag = tag.getCompound("Attributes");
-            this.maxHealth = compoundtag.getFloat("maxHealth");
-            this.maxSpeed = compoundtag.getFloat("maxSpeed");
-            this.maxReverseSpeed = compoundtag.getFloat("maxReverseSpeed");
-            this.acceleration = compoundtag.getFloat("acceleration");
-            this.rotationAcceleration = compoundtag.getFloat("rotationAcceleration");
-            this.maxRotationSpeed = compoundtag.getFloat("maxRotationSpeed");
-            this.friction = compoundtag.getFloat("friction");
+        /*this.maxHealth = 200F;
+        this.maxSpeed = 40F;
+        this.maxReverseSpeed = 5F;
+        this.acceleration = 2F;
+        this.rotationAcceleration = 5F;
+        this.maxRotationSpeed = 50F;
+        this.friction = 3F;*/
+        // Loads the savedata from the tag
+        if (tag.contains("Attributes")) {
+            tag.getCompound("Attributes").ifPresent(compoundTag -> {
+                this.maxHealth = compoundTag.getFloat("maxHealth").get();
+                this.maxSpeed = compoundTag.getFloat("maxSpeed").get();
+                this.maxReverseSpeed = compoundTag.getFloat("maxReverseSpeed").get();
+                this.acceleration = compoundTag.getFloat("acceleration").get();
+                this.rotationAcceleration = compoundTag.getFloat("rotationAcceleration").get();
+                this.maxRotationSpeed = compoundTag.getFloat("maxRotationSpeed").get();
+                this.friction = compoundTag.getFloat("friction").get();
+            });
+
         }
     }
 
     public void loadSaveData(CompoundTag tag, Ship shipEntity) { // Workaround because defineSynchedData doesn't work properly (or as I would like it to work: Use the provided 2nd argument as a "default" variable)
-        if (tag.contains("Attributes", 10)) {
+        // Checks for attributes, first time goes to else
+        if (tag.contains("Attributes")) {
             this.loadSaveData(tag);
         } else {
+            // This one create the default attributes, creates a compoundtag and runs addSaveData
+            // TLDR; saves the data to a compoundtag and returns it, saved under "Attributes"
             this.loadSaveData(shipEntity.createDefaultAttributes());
         }
+
+
     }
 
     @Override

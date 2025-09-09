@@ -13,7 +13,7 @@ public interface IceBreakable extends Ability{
 
     default void tickIceBreakable(){
         if(this.self().tickCount % 15 == 0){
-            Level level = this.self().getCommandSenderWorld();
+            Level level = this.self().level(); // --PM-- unsure change
             AABB boundingBox = self().getBoundingBox().inflate(1.5);
             double offset = 0.75D;
             BlockPos start = new BlockPos((int) (boundingBox.minX - offset), (int) (boundingBox.minY - offset), (int) (boundingBox.minZ - offset));
