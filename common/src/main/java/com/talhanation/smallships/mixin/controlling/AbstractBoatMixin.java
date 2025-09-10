@@ -13,10 +13,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class AbstractBoatMixin {
     @Shadow protected abstract void controlBoat();
 
-    @Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/vehicle/AbstractBoat;tickLerp()V"))
+    @Inject(method = "tick", at = @At("HEAD"))
     private void tickClientAndServerControlBoat(CallbackInfo ci) {
         if (((AbstractBoat)(Object)this instanceof Ship)) {
-            this.controlBoat();
+            this.controlBoat(); // call your ship's custom controls
         }
     }
 

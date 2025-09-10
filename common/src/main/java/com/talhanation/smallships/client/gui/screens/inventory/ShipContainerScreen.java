@@ -131,6 +131,11 @@ public class ShipContainerScreen extends AbstractContainerScreen<ShipContainerMe
             }
         }
 
+        // render page number
+        int xOffset = origLeftPos + (int) (133 - (float) (Mth.floor(Math.log10(this.pageCount))) * 6);
+        if (this.pageCount > 1) guiGraphics.drawString(font, (this.pageIndex + 1) + "/"  + this.pageCount, xOffset, this.inventoryLabelY, FONT_COLOR, false);
+
+        // Render ship stats
         int leftPos = 260;
         int leftPos2 = 323;
         int topPos = 38;
@@ -152,11 +157,6 @@ public class ShipContainerScreen extends AbstractContainerScreen<ShipContainerMe
         guiGraphics.drawString(font, currentSpeed + "/" + maxSpeed, leftPos2, topPos + gap * 3, FONT_COLOR, false);
         guiGraphics.drawString(font, dmg + "%", leftPos2, topPos + gap * 4, FONT_COLOR, false);
         guiGraphics.drawString(font, currentAttachment + "/" + maxAttachment, leftPos2, topPos + gap * 5, FONT_COLOR, false);
-
-        // render page number
-        int xOffset = origLeftPos + (int) (133 - (float) (Mth.floor(Math.log10(this.pageCount))) * 6);
-        int yOffset = origTopPos + this.rowCount * 18;
-        if (this.pageCount > 1) guiGraphics.drawString(font, (this.pageIndex + 1) + "/"  + this.pageCount, xOffset, yOffset, FONT_COLOR, false);
 
         guiGraphics.pose().popPose();
     }

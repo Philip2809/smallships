@@ -30,20 +30,20 @@ public class Attributes {
     }
 
     public void loadSaveData(CompoundTag tag) {
-        if (tag.contains("Attributes", 10)) {
-            CompoundTag compoundtag = tag.getCompound("Attributes");
-            this.maxHealth = compoundtag.getFloat("maxHealth");
-            this.maxSpeed = compoundtag.getFloat("maxSpeed");
-            this.maxReverseSpeed = compoundtag.getFloat("maxReverseSpeed");
-            this.acceleration = compoundtag.getFloat("acceleration");
-            this.rotationAcceleration = compoundtag.getFloat("rotationAcceleration");
-            this.maxRotationSpeed = compoundtag.getFloat("maxRotationSpeed");
-            this.friction = compoundtag.getFloat("friction");
+        if (tag.contains("Attributes")) {
+            CompoundTag compoundtag = tag.getCompound("Attributes").get();
+            this.maxHealth = compoundtag.getFloat("maxHealth").get();
+            this.maxSpeed = compoundtag.getFloat("maxSpeed").get();
+            this.maxReverseSpeed = compoundtag.getFloat("maxReverseSpeed").get();
+            this.acceleration = compoundtag.getFloat("acceleration").get();
+            this.rotationAcceleration = compoundtag.getFloat("rotationAcceleration").get();
+            this.maxRotationSpeed = compoundtag.getFloat("maxRotationSpeed").get();
+            this.friction = compoundtag.getFloat("friction").get();
         }
     }
 
     public void loadSaveData(CompoundTag tag, Ship shipEntity) { // Workaround because defineSynchedData doesn't work properly (or as I would like it to work: Use the provided 2nd argument as a "default" variable)
-        if (tag.contains("Attributes", 10)) {
+        if (tag.contains("Attributes")) {
             this.loadSaveData(tag);
         } else {
             this.loadSaveData(shipEntity.createDefaultAttributes());

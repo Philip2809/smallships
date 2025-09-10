@@ -13,6 +13,7 @@ import java.util.stream.Stream;
 
 @Mixin(ServerEntity.class)
 public class ServerEntityMixin {
+    /* --PM-- Removed, seams to work without it?
     @Redirect(method="sendChanges",
             at = @At(value= "INVOKE", target = "Lnet/minecraft/server/level/ServerEntity;removedPassengers(Ljava/util/List;Ljava/util/List;)Ljava/util/stream/Stream;"))
     public Stream<Entity> filterRemovedPassengers(List<Entity> originalPassengers, List<Entity> lastPassengers) {
@@ -30,4 +31,6 @@ public class ServerEntityMixin {
     private static Stream<Entity> removedPassengers(List<Entity> list, List<Entity> list2) {
         return null;
     }
+
+     */
 }

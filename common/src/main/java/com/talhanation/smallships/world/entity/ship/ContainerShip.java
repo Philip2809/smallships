@@ -15,10 +15,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.Containers;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.*;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -98,7 +95,7 @@ public abstract class ContainerShip extends Ship implements HasCustomInventorySc
         this.readContainerSizeSaveData(tag);
         this.readChestVehicleSaveData(tag, this.registryAccess());
 
-        this.setContainerFillState(tag.getByte("ContainerFillState"));
+        this.setContainerFillState(tag.getByte("ContainerFillState").orElse((byte) 0));
     }
 
     @Override
@@ -230,15 +227,16 @@ public abstract class ContainerShip extends Ship implements HasCustomInventorySc
     @Override
     public void readChestVehicleSaveData(@NotNull CompoundTag tag, HolderLookup.Provider levelRegistry) {
         this.clearItemStacks();
-        if (tag.contains("LootTable", 8)) {
-            this.setContainerLootTable(ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.parse(tag.getString("LootTable"))));
-            this.setContainerLootTableSeed(tag.getLong("LootTableSeed"));
-        } else {
-            ContainerUtility.loadAllItems(tag, this.getItemStacks(), levelRegistry);
+        ResourceKey resourceKey = tag.read("LootTable", LootTable.KEY_CODEC).orElse(null);
+        this.setContainerLootTable(resourceKey);
+        this.setContainerLootTableSeed(tag.getLongOr("LootTableSeed", 0L));
+        if (resourceKey == null) {
+            ContainerHelper.loadAllItems(tag, this.getItemStacks(), this.registryAccess());
             this.resizeContainer(this.getContainerSize());
         }
     }
 
+    /*
     @Override
     public void addChestVehicleSaveData(@NotNull CompoundTag tag, HolderLookup.Provider levelRegistry) {
         if (this.getLootTable().isPresent()) {
@@ -249,12 +247,11 @@ public abstract class ContainerShip extends Ship implements HasCustomInventorySc
         } else {
             ContainerUtility.saveAllItems(tag, this.getItemStacks(), levelRegistry);
         }
-    }
+    }*/
 
     public void readContainerSizeSaveData(CompoundTag tag) {
-        if (!tag.contains("ContainerSize", 3)) tag.putInt("ContainerSize", this.originalContainerSize); // If defineSychedData worked, this line wouldn't be needed
-        int containerSize = tag.getInt("ContainerSize");
-        if (containerSize == 0) containerSize = this.originalContainerSize;
+        //if (!tag.contains("ContainerSize")) tag.putInt("ContainerSize", this.originalContainerSize); // If defineSychedData worked, this line wouldn't be needed
+        int containerSize = tag.getIntOr("ContainerSize", this.originalContainerSize);
         this.updatePaging(containerSize);
         this.setData(CONTAINER_SIZE, containerSize);
         if (!this.level().isClientSide()) this.level().players()
