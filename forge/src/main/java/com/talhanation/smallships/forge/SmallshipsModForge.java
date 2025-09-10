@@ -9,7 +9,6 @@ import com.talhanation.smallships.world.item.forge.ModItemsImpl;
 import com.talhanation.smallships.world.particles.forge.ModParticleTypesImpl;
 import com.talhanation.smallships.world.sound.forge.ModSoundTypesImpl;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
@@ -24,14 +23,14 @@ public class SmallshipsModForge {
     public SmallshipsModForge() {
         new SmallShipsMod();
 
-        IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+        var modBusGroup = FMLJavaModLoadingContext.get().getModBusGroup();
 
-        ModItemsImpl.ITEMS.register(modEventBus);
-        if (hasCustomItemGroup) ModItemsImpl.CREATIVE_MODE_TABS.register(modEventBus);
-        ModEntityTypesImpl.ENTITY_TYPES.register(modEventBus);
-        ModMenuTypesImpl.MENU_TYPES.register(modEventBus);
-        ModSoundTypesImpl.SOUND_EVENTS.register(modEventBus);
-        ModParticleTypesImpl.PARTICLE_TYPES.register(modEventBus);
+        ModItemsImpl.ITEMS.register(modBusGroup);
+        if (hasCustomItemGroup) ModItemsImpl.CREATIVE_MODE_TABS.register(modBusGroup);
+        ModEntityTypesImpl.ENTITY_TYPES.register(modBusGroup);
+        ModMenuTypesImpl.MENU_TYPES.register(modBusGroup);
+        ModSoundTypesImpl.SOUND_EVENTS.register(modBusGroup);
+        ModParticleTypesImpl.PARTICLE_TYPES.register(modBusGroup);
 
         MinecraftForge.EVENT_BUS.register(new PassengerEvents());
     }

@@ -5,7 +5,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.eventbus.api.listener.SubscribeEvent;
 
 // This should have been in common/CommonGameBus, instead it is here cluttering the structure of the project
 public class PassengerEvents {
@@ -23,6 +23,7 @@ public class PassengerEvents {
 
             entity.stopRiding();
             event.setCancellationResult(InteractionResult.SUCCESS);
+            // TODO: This errors; find the replacment 
             event.setCanceled(true);
         }
 
@@ -30,6 +31,7 @@ public class PassengerEvents {
             if(ship.canAddPassenger(entity) && !(entity instanceof Player)){
                 entity.startRiding(ship);
                 event.setCancellationResult(InteractionResult.SUCCESS);
+                // TODO: This errors; find the replacment 
                 event.setCanceled(true);
             }
         }

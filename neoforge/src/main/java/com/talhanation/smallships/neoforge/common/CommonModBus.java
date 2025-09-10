@@ -36,7 +36,7 @@ import static com.talhanation.smallships.network.neoforge.ModPacketsImpl.clientb
 import static com.talhanation.smallships.network.neoforge.ModPacketsImpl.serverboundPackets;
 
 @SuppressWarnings("unused")
-@EventBusSubscriber(modid = SmallShipsMod.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = SmallShipsMod.MOD_ID)
 public class CommonModBus {
     @SubscribeEvent
     static void init(FMLCommonSetupEvent event) {

@@ -13,7 +13,7 @@ public class SmallShipsConfigImpl {
     public SmallShipsConfigImpl() {
         ModConfigEvents.loading(SmallShipsMod.MOD_ID).register(config -> {
             boolean updated = SmallShipsConfig.updateConfig(new SmallShipsConfig.ModConfigWrapper(config.getType().toString(), config.getFullPath(), config.getFileName(), config.getLoadedConfig().config()));
-            if (updated) config.getFileName();
+            if (updated) config.getFileName(); // --PM-- TODO, not sure if this is correct
         });
     }
 

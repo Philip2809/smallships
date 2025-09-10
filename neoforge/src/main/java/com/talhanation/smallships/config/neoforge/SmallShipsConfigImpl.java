@@ -1,7 +1,7 @@
 package com.talhanation.smallships.config.neoforge;
 
 import com.talhanation.smallships.config.SmallShipsConfig;
-import fuzs.forgeconfigapiport.neoforge.api.forge.v4.ForgeConfigRegistry;
+import fuzs.forgeconfigapiport.neoforge.api.v5.ForgeConfigRegistry;
 import net.minecraftforge.fml.config.IConfigSpec;
 import net.neoforged.fml.config.ModConfig;
 
