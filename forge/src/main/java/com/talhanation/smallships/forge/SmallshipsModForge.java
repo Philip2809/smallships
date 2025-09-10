@@ -9,6 +9,7 @@ import com.talhanation.smallships.world.item.forge.ModItemsImpl;
 import com.talhanation.smallships.world.particles.forge.ModParticleTypesImpl;
 import com.talhanation.smallships.world.sound.forge.ModSoundTypesImpl;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
@@ -32,6 +33,7 @@ public class SmallshipsModForge {
         ModSoundTypesImpl.SOUND_EVENTS.register(modBusGroup);
         ModParticleTypesImpl.PARTICLE_TYPES.register(modBusGroup);
 
-        MinecraftForge.EVENT_BUS.register(new PassengerEvents());
+        PlayerInteractEvent.EntityInteract.BUS.addListener(PassengerEvents::onPlayerInteractWithPassenger);
+
     }
 }

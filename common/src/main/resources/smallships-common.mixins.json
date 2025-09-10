@@ -3,7 +3,6 @@
   "package": "com.talhanation.smallships.mixin",
   "compatibilityLevel": "JAVA_21",
   "minVersion": "0.8",
-  "refmap": "smallships-common-1.21.8-common-refmap.json",
   "client": [
     "client.KeyboardHandlerMixin",
     "render.LivingEntityRendererMixin",

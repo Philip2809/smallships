@@ -6,6 +6,7 @@ import com.talhanation.smallships.world.entity.projectile.ICannonProjectile;
 import com.talhanation.smallships.utils.ServerParticleUtils;
 import com.talhanation.smallships.world.sound.ModSoundTypes;
 import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.RandomSource;
@@ -181,6 +182,7 @@ public class Cannon {
 
     private void playReloadedSound() {
         if (this.level.isClientSide()) return;
+        //--PM-- debug this.level.players().get(0).displayClientMessage(Component.literal("playReloadedSound"), true);
         this.owner.playSoundAt(SoundEvents.ARMOR_EQUIP_NETHERITE.value(), 2, 1);
     }
 

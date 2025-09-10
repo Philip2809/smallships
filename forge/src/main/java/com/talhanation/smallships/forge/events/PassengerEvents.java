@@ -10,7 +10,7 @@ import net.minecraftforge.eventbus.api.listener.SubscribeEvent;
 // This should have been in common/CommonGameBus, instead it is here cluttering the structure of the project
 public class PassengerEvents {
     @SubscribeEvent
-    public void onPlayerInteractWithPassenger(PlayerInteractEvent.EntityInteract event){
+    static public boolean onPlayerInteractWithPassenger(PlayerInteractEvent.EntityInteract event){
         Player player = event.getEntity();
         Entity entity = event.getTarget();
 
@@ -23,17 +23,16 @@ public class PassengerEvents {
 
             entity.stopRiding();
             event.setCancellationResult(InteractionResult.SUCCESS);
-            // TODO: This errors; find the replacment 
-            event.setCanceled(true);
+            return true;
         }
 
         if(player.isPassenger() && player.getVehicle() != null && player.getVehicle() instanceof Ship ship){
             if(ship.canAddPassenger(entity) && !(entity instanceof Player)){
                 entity.startRiding(ship);
                 event.setCancellationResult(InteractionResult.SUCCESS);
-                // TODO: This errors; find the replacment 
-                event.setCanceled(true);
+                return true;
             }
         }
+        return false;
     }
 }

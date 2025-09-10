@@ -4,6 +4,7 @@ import com.mojang.datafixers.util.Pair;
 import com.talhanation.smallships.world.entity.ship.Ship;
 import com.talhanation.smallships.world.entity.ship.abilities.Cannonable;
 import com.talhanation.smallships.world.sound.ModSoundTypes;
+import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.RandomSource;
@@ -52,6 +53,10 @@ public class ShipCannon {
     public void tick(){
         if (coolDown > 0) coolDown--;
         this.updatePosition();
+
+        if (this.coolDown == 3) {
+            this.playReloadedSound();
+        }
     }
 
     public void trigger() {
@@ -206,4 +211,13 @@ public class ShipCannon {
         };
         play.accept(ModSoundTypes.CANNON_SHOT, Pair.of(10.0F, 1.0F));
     }
+
+    private void playReloadedSound() {
+        BiConsumer<SoundEvent, Pair<Float, Float>> play = (sound, modifier) -> {
+            if (!ship.level().isClientSide()) ship.playSound(sound, modifier.getFirst(), modifier.getSecond());
+            else ship.level().playLocalSound(ship.getX(), ship.getY() + 4, ship.getZ(), sound, ship.getSoundSource(), modifier.getFirst(), modifier.getSecond(), false);
+        };
+        play.accept(SoundEvents.ARMOR_EQUIP_NETHERITE.value(), Pair.of(10.0F, 1.0F));
+    }
+
 }
