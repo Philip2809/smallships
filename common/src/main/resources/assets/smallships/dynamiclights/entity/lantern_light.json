@@ -1,0 +1,8 @@
+{
+  "match": {
+    "type": [
+      "smallships:lantern_light"
+    ]
+  },
+  "luminance": 15
+}

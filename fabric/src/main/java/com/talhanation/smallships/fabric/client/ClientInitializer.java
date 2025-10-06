@@ -5,6 +5,7 @@ import com.talhanation.smallships.client.option.KeyEvent;
 import com.talhanation.smallships.client.option.ModGameOptions;
 import com.talhanation.smallships.client.renderer.entity.*;
 import com.talhanation.smallships.network.fabric.ModPacketsImpl;
+import com.talhanation.smallships.world.entity.LanternLightEntity;
 import com.talhanation.smallships.world.entity.ModEntityTypes;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
@@ -34,6 +35,7 @@ public class ClientInitializer implements ClientModInitializer {
     private void initRendererRegisterRenderers() {
         EntityRendererRegistry.register(ModEntityTypes.CANNON_BALL, CannonBallRenderer::new);
         EntityRendererRegistry.register(ModEntityTypes.GROUND_CANNON, GroundCannonRenderer::new);
+        EntityRendererRegistry.register(ModEntityTypes.LANTERN_LIGHT, LanternLightRenderer::new);
 
         EntityRendererRegistry.register(ModEntityTypes.COG, CogRenderer::new);
         EntityRendererRegistry.register(ModEntityTypes.BRIGG, BriggRenderer::new);

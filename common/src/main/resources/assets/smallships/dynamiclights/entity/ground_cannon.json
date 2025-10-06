@@ -1,0 +1,8 @@
+{
+  "match": {
+    "type": [
+      "smallships:ground_cannon"
+    ]
+  },
+  "luminance": 15
+}

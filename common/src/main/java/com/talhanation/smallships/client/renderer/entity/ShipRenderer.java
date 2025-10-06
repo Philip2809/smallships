@@ -19,6 +19,7 @@ import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.blockentity.BannerRenderer;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EntityRenderer;
@@ -35,6 +36,8 @@ import net.minecraft.world.item.BannerItem;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LanternBlock;
 import net.minecraft.world.level.block.entity.BannerPatternLayers;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Quaternionf;
@@ -241,12 +244,32 @@ public abstract class  ShipRenderer<T extends Ship> extends EntityRenderer<T, Sh
             BannerRenderer.renderPatterns(poseStack, multiBufferSource, packedLight, OverlayTexture.NO_OVERLAY, bannerModel, ModelBakery.BANNER_BASE, true, dyeColor, bannerPatternLayers);
             poseStack.popPose();
         }
-    }
+    }libflite
 
     private static final ShieldModel shieldModel = new ShieldModel(Minecraft.getInstance().getEntityModels().bakeLayer(ModelLayers.SHIELD));
 
     @SuppressWarnings("unused")
     private void renderShields(ShipRenderState state, PoseStack poseStack, @NotNull MultiBufferSource multiBufferSource, int packedLight) {
+
+        var mc = Minecraft.getInstance();
+        var blockRenderer = mc.getBlockRenderer();
+        //var lantern = Blocks.LANTERN.defaultBlockState().setValue(LanternBlock.HANGING, true);
+        var lantern = Blocks.LANTERN.defaultBlockState();
+
+        poseStack.pushPose();
+        poseStack.translate(3.1, 0.2, -0.5);
+        //SHIELD_POSITIONS.add(new Shieldable.ShieldPosition(2.1, 0.8, -1.0, true));
+
+        poseStack.mulPose(Axis.ZP.rotationDegrees(180.0F));
+        blockRenderer.renderSingleBlock(
+                lantern,
+                poseStack,
+                multiBufferSource,
+                15 << 4,
+                OverlayTexture.NO_OVERLAY
+        );
+        poseStack.popPose();
+
         for (byte i = 0; i < state.shieldable.getShields().size(); i++) {
             ItemStack shieldItemStack = state.shieldable.getShields().get(i);
             if (shieldItemStack.is(Items.SHIELD)) {

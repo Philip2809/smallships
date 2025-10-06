@@ -1,6 +1,7 @@
 build/
 *.ipr
 run/
+run-player2/
 *.iws
 out/
 *.iml

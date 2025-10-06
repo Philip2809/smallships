@@ -21,3 +21,4 @@
 - No reload sound when ready to fire again for ship-cannons
     - same with fuze found
 - Banner not dropped when destroyed
+- Sound when adding banner and cannons

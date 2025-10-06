@@ -1,11 +1,15 @@
 package com.talhanation.smallships.world.entity.ship;
 
+import com.talhanation.smallships.SmallShipsMod;
 import com.talhanation.smallships.config.SmallShipsConfig;
+import com.talhanation.smallships.world.entity.LanternLightEntity;
 import com.talhanation.smallships.world.entity.ModEntityTypes;
 import com.talhanation.smallships.world.entity.ship.abilities.*;
 import com.talhanation.smallships.world.item.ModItems;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
@@ -41,6 +45,13 @@ public class DrakkarEntity extends ContainerShip implements Bannerable, Sailable
 
     public DrakkarEntity(EntityType<? extends AbstractBoat> entityType, Level level) {
         super(entityType, level, ORIGINAL_CONTAINER_SIZE);
+
+        LanternLightEntity light = new LanternLightEntity(ModEntityTypes.LANTERN_LIGHT, level);
+        light.snapTo(this.getX() + 3.1, this.getY() + 0.2, this.getZ() - 0.5);
+        light.onShip = this;
+        level.addFreshEntity(light);
+        //this.addPassenger(light);
+        //light.startRiding(this);
     }
 
     private DrakkarEntity(Level level, double d, double e, double f) {
@@ -89,6 +100,9 @@ public class DrakkarEntity extends ContainerShip implements Bannerable, Sailable
         float v = 1.0F;
         float h = 0.0F;
         if (!this.getPassengers().isEmpty()) {
+            if (entity instanceof LanternLightEntity) {
+                return new Vec3(3.1, 0.2, -0.5).yRot(-this.getYRot() * (float) (Math.PI / 180.0) - (float) (Math.PI / 2.0F));
+            }
             int i = this.getPassengers().indexOf(entity);
             switch (i) {
                 case (0) -> {
